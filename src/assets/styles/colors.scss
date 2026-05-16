@@ -1,24 +1,23 @@
 :root {
-  //--color-text-400: #001341;
-  --color-text-400: #2d2a24;
-  --color-text-300: #5f5646;
+  --color-text-400: #e0e0e0;
+  --color-text-300: #b0b0b0;
 
-  --color-grayscale-500: rgb(223, 210, 191);
-  --color-grayscale-400: rgb(233, 222, 208);
+  --color-grayscale-500: rgb(40, 40, 40);
+  --color-grayscale-400: rgb(60, 60, 60);
 
-  --color-beige-700: rgb(223, 209, 188);
-  --color-beige-600: rgb(233, 222, 208);
-  --color-beige-500: rgb(241, 229, 213);
-  --color-beige-400: #f5efe6;
+  --color-beige-700: #1a1a1a;
+  --color-beige-600: #222222;
+  --color-beige-500: #2a2a2a;
+  --color-beige-400: #111111;
 
-  --color-background-400: #f5efe6;
+  --color-background-400: #0a0a0a;
 
-  --color-black-400: #2d2a24;
+  --color-black-400: #000000;
 
-  --color-gray-500: #67727c;
-  --color-gray-400: #a9b0b7;
+  --color-gray-500: #444444;
+  --color-gray-400: #666666;
 
-  --color-orange-400: #ff8400;
+  --color-orange-400: #ff8400; /* Keeping some contrast for accents if any */
 
   --color-white-400: #ffffff;
 
@@ -28,10 +27,10 @@
   --color-text-cyan-400: #e1f5ff;
   --color-text-cyan-300: #81bdd8;
 
-  --color-dark-blue-600: #234ba2;
-  --color-dark-blue-500: #052e87;
-  --color-dark-blue-400: #002474;
+  --color-dark-blue-600: #1a1a1a;
+  --color-dark-blue-500: #111111;
+  --color-dark-blue-400: #000000;
 
-  --color-hologram-top: rgb(0, 53, 133);
-  --color-hologram-bottom: rgba(0, 82, 145, 0.6);
+  --color-hologram-top: rgb(20, 20, 20);
+  --color-hologram-bottom: rgba(10, 10, 10, 0.6);
 }
