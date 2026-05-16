@@ -7,7 +7,6 @@ import { sceneWeights } from "../../../animations/scenes";
 import { face } from "./face";
 import { sleepingSprite } from "../contact/sleeping-sprite";
 import { playSound } from "../../../features/sounds/utils/sounds";
-import { isFeatureEnabled } from "../../../utils/features";
 import { stopSnoreRepetition } from "../../../features/sounds/core/contact";
 
 import type { AnimationClip, Object3D } from "three";
@@ -16,13 +15,20 @@ let mixer: AnimationMixer;
 let activeAction: string | null = null;
 const actions = new Map<string, AnimationAction>();
 let isAwake = false;
-const wavingStrength = { value: isFeatureEnabled("introWave") ? 1 : 0 };
-let hologramMixer: AnimationMixer;
+const wavingStrength = { value: 0 };
+let hologramMixer: AnimationMixer | null = null;
 const hologramActions = new Map<string, AnimationAction>();
 
 const init = () => {
-  mixer = new AnimationMixer(avatar.getMesh() as Object3D);
-  hologramMixer = new AnimationMixer(avatarHologram.getMesh() as Object3D);
+  const mesh = avatar.getMesh();
+  if (mesh) {
+    mixer = new AnimationMixer(mesh as Object3D);
+  }
+  
+  const hologramMesh = avatarHologram?.getMesh();
+  if (hologramMesh) {
+    hologramMixer = new AnimationMixer(hologramMesh as Object3D);
+  }
 
   setupActions();
   setupHologramActions();
@@ -34,101 +40,131 @@ const init = () => {
 
 const getActionFromMesh = (name: string) => {
   const resource = resources.items["avatar-model"];
-  const action = resource.animations.find((animation: AnimationClip) => animation.name === name);
-  if (!action) throw new Error("[AvatarAnimations] Action not found");
-  return action;
+  const action = resource.animations?.find((animation: AnimationClip) => animation.name === name);
+  return action || null;
 };
 
+
 const setupActions = () => {
-  //idle
-  const desktopIdle = mixer.clipAction(getActionFromMesh("idle"));
-  desktopIdle.loop = LoopPingPong;
-  actions.set("desktop-idle", desktopIdle);
-  desktopIdle.weight = 1;
+  if (!mixer) return;
+  // The new model might not have these animations, fail gracefully
+  
+  const desktopIdleClip = getActionFromMesh("idle");
+  if (desktopIdleClip) {
+    const desktopIdle = mixer.clipAction(desktopIdleClip);
+    desktopIdle.loop = LoopPingPong;
+    actions.set("desktop-idle", desktopIdle);
+    desktopIdle.weight = 1;
+  }
 
-  //t-idle
-  const tIdle = mixer.clipAction(getActionFromMesh("t-idle"));
-  tIdle.loop = LoopPingPong;
-  actions.set("t-idle", tIdle);
-  tIdle.weight = 0;
-  tIdle.play();
+  const tIdleClip = getActionFromMesh("t-idle");
+  if (tIdleClip) {
+    const tIdle = mixer.clipAction(tIdleClip);
+    tIdle.loop = LoopPingPong;
+    actions.set("t-idle", tIdle);
+    tIdle.weight = 0;
+    tIdle.play();
+  }
 
-  //left-desktop
-  const leftDesktop = mixer.clipAction(getActionFromMesh("left-desktop"));
-  leftDesktop.repetitions = 1;
-  leftDesktop.clampWhenFinished = true;
-  actions.set("left-desktop", leftDesktop);
-  leftDesktop.weight = 0;
+  const leftDesktopClip = getActionFromMesh("left-desktop");
+  if (leftDesktopClip) {
+    const leftDesktop = mixer.clipAction(leftDesktopClip);
+    leftDesktop.repetitions = 1;
+    leftDesktop.clampWhenFinished = true;
+    actions.set("left-desktop", leftDesktop);
+    leftDesktop.weight = 0;
+  }
 
-  //sleeping
-  const sleeping = mixer.clipAction(getActionFromMesh("sleeping"));
-  sleeping.loop = LoopPingPong;
-  actions.set("sleeping", sleeping);
-  sleeping.weight = 1;
-  sleeping.play();
+  const sleepingClip = getActionFromMesh("sleeping");
+  if (sleepingClip) {
+    const sleeping = mixer.clipAction(sleepingClip);
+    sleeping.loop = LoopPingPong;
+    actions.set("sleeping", sleeping);
+    sleeping.weight = 1;
+    sleeping.play();
+  }
 
-  //wake-up
-  const wake = mixer.clipAction(getActionFromMesh("wake-up"));
-  wake.repetitions = 1;
-  wake.clampWhenFinished = true;
-  actions.set("wake-up", wake);
+  const wakeClip = getActionFromMesh("wake-up");
+  if (wakeClip) {
+    const wake = mixer.clipAction(wakeClip);
+    wake.repetitions = 1;
+    wake.clampWhenFinished = true;
+    actions.set("wake-up", wake);
+  }
 
-  //contact-idle
-  const contactIdle = mixer.clipAction(getActionFromMesh("contact-idle"));
-  contactIdle.loop = LoopPingPong;
-  actions.set("contact-idle", contactIdle);
+  const contactIdleClip = getActionFromMesh("contact-idle");
+  if (contactIdleClip) {
+    const contactIdle = mixer.clipAction(contactIdleClip);
+    contactIdle.loop = LoopPingPong;
+    actions.set("contact-idle", contactIdle);
+  }
 
-  //wave
-  const wave = mixer.clipAction(getActionFromMesh("wave"));
-  wave.clampWhenFinished = true;
-  wave.loop = LoopOnce;
-  actions.set("wave", wave);
+  const waveClip = getActionFromMesh("wave");
+  if (waveClip) {
+    const wave = mixer.clipAction(waveClip);
+    wave.clampWhenFinished = true;
+    wave.loop = LoopOnce;
+    actions.set("wave", wave);
+  }
 };
 
 const setupHologramActions = () => {
-  //idle
-  const desktopIdle = hologramMixer.clipAction(getActionFromMesh("idle"));
-  desktopIdle.loop = LoopPingPong;
-  hologramActions.set("desktop-idle", desktopIdle);
-  desktopIdle.weight = 1;
-  desktopIdle.play();
+  if (!hologramMixer) return;
+  
+  const desktopIdleClip = getActionFromMesh("idle");
+  if (desktopIdleClip) {
+    const desktopIdle = hologramMixer.clipAction(desktopIdleClip);
+    desktopIdle.loop = LoopPingPong;
+    hologramActions.set("desktop-idle", desktopIdle);
+    desktopIdle.weight = 1;
+    desktopIdle.play();
+  }
 
-  //t-idle
-  const tIdle = hologramMixer.clipAction(getActionFromMesh("t-idle"));
-  tIdle.loop = LoopPingPong;
-  hologramActions.set("t-idle", tIdle);
-  tIdle.weight = 0;
-  tIdle.play();
+  const tIdleClip = getActionFromMesh("t-idle");
+  if (tIdleClip) {
+    const tIdle = hologramMixer.clipAction(tIdleClip);
+    tIdle.loop = LoopPingPong;
+    hologramActions.set("t-idle", tIdle);
+    tIdle.weight = 0;
+    tIdle.play();
+  }
 
-  //left-desktop
-  const leftDesktop = hologramMixer.clipAction(getActionFromMesh("left-desktop"));
-  leftDesktop.repetitions = 1;
-  leftDesktop.clampWhenFinished = true;
-  hologramActions.set("left-desktop", leftDesktop);
-  leftDesktop.weight = 0;
+  const leftDesktopClip = getActionFromMesh("left-desktop");
+  if (leftDesktopClip) {
+    const leftDesktop = hologramMixer.clipAction(leftDesktopClip);
+    leftDesktop.repetitions = 1;
+    leftDesktop.clampWhenFinished = true;
+    hologramActions.set("left-desktop", leftDesktop);
+    leftDesktop.weight = 0;
+  }
 
-  //wave
-  const wave = hologramMixer.clipAction(getActionFromMesh("wave"));
-  wave.clampWhenFinished = true;
-  wave.loop = LoopOnce;
-  hologramActions.set("wave", wave);
+  const waveClip = getActionFromMesh("wave");
+  if (waveClip) {
+    const wave = hologramMixer.clipAction(waveClip);
+    wave.clampWhenFinished = true;
+    wave.loop = LoopOnce;
+    hologramActions.set("wave", wave);
+  }
 };
 
 const play = (name: string, transition: number = 0.5) => {
   if (activeAction === name) return;
   const newAction = actions.get(name);
   const newHologramAction = hologramActions.get(name);
-  if (!newAction || !newHologramAction) throw new Error("[AvatarAnimations] Action not found");
-
-  newAction.reset().play();
-  newHologramAction.reset().play();
+  // Fail gracefully if animations are missing
+  if (newAction) {
+    newAction.reset().play();
+  }
+  if (newHologramAction) {
+    newHologramAction.reset().play();
+  }
 
   if (activeAction) {
     const currentAction = actions.get(activeAction);
-    if (currentAction) currentAction.crossFadeTo(newAction, transition);
+    if (currentAction && newAction) currentAction.crossFadeTo(newAction, transition);
 
     const currentHologramAction = hologramActions.get(activeAction);
-    if (currentHologramAction) currentHologramAction.crossFadeTo(newHologramAction, transition);
+    if (currentHologramAction && newHologramAction) currentHologramAction.crossFadeTo(newHologramAction, transition);
   }
 
   activeAction = name;
@@ -152,7 +188,6 @@ const updateIntro = () => {
 };
 
 const wave = () => {
-  //get wave duration from action
   const waveAction = actions.get("wave");
   const hologramWaveAction = hologramActions.get("wave");
   if (!waveAction) return;
@@ -162,7 +197,10 @@ const wave = () => {
   waveAction.play();
   hologramWaveAction?.play();
 
-  tl.add(face.wave());
+  // Try to use face if it's there
+  if (face && face.wave) {
+    tl.add(face.wave());
+  }
   tl.fromTo(wavingStrength, { value: 1 }, { value: 0 }, waveDuration - 0.2);
 
   return tl;
@@ -191,8 +229,12 @@ const wakeUp = () => {
     contactIdleAction.play();
   }, wakeUpDuration * 1000);
 
-  face.wakeUp();
-  sleepingSprite.hide();
+  if (face && face.wakeUp) {
+    face.wakeUp();
+  }
+  if (sleepingSprite && sleepingSprite.hide) {
+    sleepingSprite.hide();
+  }
 };
 
 const updateContact = () => {
@@ -214,8 +256,8 @@ const update = () => {
   }
 
   const delta = gsap.ticker.deltaRatio(60);
-  mixer.update(delta / 60);
-  hologramMixer.update(delta / 60);
+  if (mixer) mixer.update(delta / 60);
+  if (hologramMixer) hologramMixer.update(delta / 60);
 };
 
 export const animations = { init, play, actions, update, wakeUp, getIsAwake: () => isAwake, wave };

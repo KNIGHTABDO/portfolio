@@ -1,22 +1,17 @@
 import { resources } from "../../../utils/resources";
-import { Mesh, Vector3, Euler, Group, ShaderMaterial, LinearSRGBColorSpace } from "three";
+import { Mesh, Vector3, Euler, Group, MeshStandardMaterial } from "three";
 import { scene } from "../../core/scene";
 import { animations } from "./animations";
 import { sceneWeights, sceneWeightsInOut } from "../../../animations/scenes";
 import { clone as cloneSkeleton } from "three/examples/jsm/utils/SkeletonUtils.js";
 import { face } from "./face";
 import { leftDesktop as avatarLeftDesktop } from "./left-desktop";
-import matcapVertexShader from "../../shaders/avatar-matcap/vertex.glsl";
-import matcapFragmentShader from "../../shaders/avatar-matcap/fragment.glsl";
-import headVertexShader from "../../shaders/avatar-head/vertex.glsl";
-import headFragmentShader from "../../shaders/avatar-head/fragment.glsl";
 import gsap from "gsap";
 import { aboutProgress } from "../../../animations/transitions/about";
-//import { avatarHologram } from "./hologram";
 
-import type { Material, Bone, Texture } from "three";
+import type { Bone, Object3D } from "three";
 
-let mesh: Mesh | null = null;
+let mesh: Group | Object3D | null = null;
 let rightHandBone: Bone | null = null;
 
 const tIdleIntensity = { value: 0 };
@@ -36,89 +31,26 @@ const init = () => {
   gsap.ticker.add(tick);
 };
 
-const getMaterial = (name: string): Material | null => {
-  if (name === "face") return face.getMaterial();
-  if (name === "head") {
-    const texture = resources.items["head-texture"];
-    texture.flipY = false;
-    texture.colorSpace = LinearSRGBColorSpace;
-    texture.generateMipmaps = false;
-    return new ShaderMaterial({
-      vertexShader: headVertexShader,
-      fragmentShader: headFragmentShader,
-      transparent: true,
-      uniforms: {
-        uHeadTexture: { value: texture },
-        ...uniforms,
-      },
-    });
-  }
-
-  const tex = resources.items["matcap-black"];
-  tex.colorSpace = LinearSRGBColorSpace;
-  tex.generateMipmaps = false;
-
-  return new ShaderMaterial({
-    vertexShader: matcapVertexShader,
-    fragmentShader: matcapFragmentShader,
-    transparent: true,
-    uniforms: {
-      uMatcap: { value: tex },
-      ...uniforms,
-    },
-  });
-};
-
-const assignMatcap = (child: Mesh): boolean => {
-  let tex: Texture | null = null;
-
-  if (child.name === "black") {
-    tex = resources.items["matcap-black"];
-  } else if (child.name === "gray") {
-    tex = resources.items["matcap-gray"];
-  } else if (child.name === "skin") {
-    tex = resources.items["matcap-skin"];
-  } else if (child.name === "white") {
-    tex = resources.items["matcap-white"];
-  }
-
-  if (tex) {
-    tex.colorSpace = LinearSRGBColorSpace;
-    child.userData.matcap = tex;
-    return true;
-  }
-
-  return false;
-};
-
 const setupMesh = () => {
   if (mesh) return;
   const resource = resources.items["avatar-model"];
-  mesh = cloneSkeleton(resource.scene.children[0]) as Mesh;
-
-  mesh.frustumCulled = false;
+  mesh = cloneSkeleton(resource.scene) as Group;
 
   mesh.traverse((child) => {
     if (child instanceof Mesh) {
-      const mat = getMaterial(child.name);
-      if (!mat) return;
-      child.material = mat;
       child.frustumCulled = false;
-      child.renderOrder = child.name === "face" ? 25 : 24;
-
-      const hasMatcap = assignMatcap(child);
-      if (hasMatcap) {
-        child.onBeforeRender = () => {
-          child.material.uniforms.uMatcap.value = child.userData.matcap;
-        };
-      }
+      // Basic dark metallic material for the ironman model
+      child.material = new MeshStandardMaterial({
+        color: 0x1a1a1a,
+        metalness: 0.8,
+        roughness: 0.2,
+      });
     }
   });
 
-  const brain = mesh.getObjectByName("brain") as Mesh;
-  if (brain) {
-    mesh.remove(brain);
-  }
+  // Scale adjustment if needed for iron man model, typically obj converted models need scaling
+  mesh.scale.set(0.05, 0.05, 0.05);
+  mesh.position.y = -1; // Adjust based on visual
 
   mesh.rotation.z = 0;
 
@@ -146,7 +78,6 @@ const tick = () => {
   transform.position.copy(waypointsPosition);
   transform.rotation.copy(waypointsRotation);
 
-  //uniforms.uProgress.value = sceneWeightsInOut.about.in * 1.1 - 0.1;
   uniforms.uProgress.value = aboutProgress.value * 1.1 - 0.1;
   uniforms.uAmbientStrength.value = sceneWeightsInOut.about.in;
 
@@ -159,8 +90,6 @@ const tick = () => {
 };
 
 const destroy = () => {
-  //mesh = null;
-  //transform.clear();
   face.destroy();
   gsap.ticker.remove(tick);
 };

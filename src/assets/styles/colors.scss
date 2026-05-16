@@ -1,36 +1,40 @@
 :root {
   --color-text-400: #e0e0e0;
-  --color-text-300: #b0b0b0;
+  --color-text-300: #888888;
 
-  --color-grayscale-500: rgb(40, 40, 40);
-  --color-grayscale-400: rgb(60, 60, 60);
+  --color-grayscale-500: #1f1f1f;
+  --color-grayscale-400: #2b2b2b;
 
-  --color-beige-700: #1a1a1a;
-  --color-beige-600: #222222;
-  --color-beige-500: #2a2a2a;
-  --color-beige-400: #111111;
+  --color-beige-700: #0a0a0a;
+  --color-beige-600: #121212;
+  --color-beige-500: #181818;
+  --color-beige-400: #000000;
+  --color-beige-100: #e0e0e0; /* Adding this for github card titles */
 
-  --color-background-400: #0a0a0a;
+  --color-background-400: #000000;
 
   --color-black-400: #000000;
 
+  --color-gray-900: #121212;
+  --color-gray-800: #1e1e1e;
+  --color-gray-700: #2c2c2c;
   --color-gray-500: #444444;
-  --color-gray-400: #666666;
+  --color-gray-400: #888888;
 
-  --color-orange-400: #ff8400; /* Keeping some contrast for accents if any */
+  --color-orange-400: #e0e0e0; /* Overriding orange to off-white to keep minimalist theme */
 
   --color-white-400: #ffffff;
 
-  --color-cyan-500: #0086bb;
-  --color-cyan-400: rgb(52, 191, 255);
+  --color-cyan-500: #2b2b2b;
+  --color-cyan-400: #444444;
 
-  --color-text-cyan-400: #e1f5ff;
-  --color-text-cyan-300: #81bdd8;
+  --color-text-cyan-400: #e0e0e0;
+  --color-text-cyan-300: #888888;
 
-  --color-dark-blue-600: #1a1a1a;
-  --color-dark-blue-500: #111111;
+  --color-dark-blue-600: #0a0a0a;
+  --color-dark-blue-500: #000000;
   --color-dark-blue-400: #000000;
 
-  --color-hologram-top: rgb(20, 20, 20);
-  --color-hologram-bottom: rgba(10, 10, 10, 0.6);
+  --color-hologram-top: #1a1a1a;
+  --color-hologram-bottom: rgba(0, 0, 0, 0.8);
 }

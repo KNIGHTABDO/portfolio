@@ -1,4 +1,4 @@
-import avatarModel from "./assets/models/avatar.glb";
+import avatarModel from "./assets/models/ironman.glb";
 import labModel from "./assets/models/lab.glb";
 import roomModel from "./assets/models/room.glb";
 import contactModel from "./assets/models/contact.glb";
